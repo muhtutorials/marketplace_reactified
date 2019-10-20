@@ -20,7 +20,7 @@ const Job = props => {
   }
 
   return (
-    <Card className="mt-4 text-center">
+    <Card className="my-4 text-center">
       <Card.Header className="position-relative">
         <Card.Title>{job.title}</Card.Title>
         <span
