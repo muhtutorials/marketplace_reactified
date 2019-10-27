@@ -3,6 +3,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 import { LinkContainer } from 'react-router-bootstrap';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 
 import { logout } from '../../actions/auth';
 
@@ -21,7 +22,7 @@ const Navigation = props => {
           isAuthenticated ?
             <>
               <LinkContainer to="#"><Nav.Link href="#">{user.username}</Nav.Link></LinkContainer>
-              <Nav.Link href="#" onClick={props.logout}>Logout</Nav.Link>
+              <Nav.Link href="#" onClick={() => props.logout(props.history)}>Logout</Nav.Link>
             </>
           :
             <>
@@ -38,4 +39,4 @@ const Navigation = props => {
 const mapStateToProps = state => ({ auth: state.auth });
 
 
-export default connect(mapStateToProps, { logout })(Navigation);
+export default connect(mapStateToProps, { logout })(withRouter(Navigation));

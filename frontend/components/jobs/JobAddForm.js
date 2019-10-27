@@ -1,69 +1,65 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+
 import { addJob } from '../../actions/jobs';
 
 
-class JobAddForm extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { title: '', description: '', budget: '' }
-  }
+const JobAddForm = props => {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [budget, setBudget] = useState('');
 
-  handleChange = event => this.setState({
-    [event.target.name]: event.target.value
-  });
-
-  handleSubmit = event => {
-    event.preventDefault();
-    this.props.addJob({
-      title: this.state.title,
-      description: this.state.description,
-      budget: this.state.budget},
-      this.props.history
-    );
+  const handleSubmit = e => {
+    e.preventDefault();
+    props.addJob({ title, description, budget }, props.history);
   };
 
-  render() {
-    return (
-      <div className="mt-4">
-        <h3>Add a job</h3>
-          <Form onSubmit={this.handleSubmit}>
-            <Form.Group>
-              <Form.Label>Title: </Form.Label>
-              <Form.Control
-                type="text"
-                name="title"
-                value={this.state.title}
-                onChange={this.handleChange}
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Description: </Form.Label>
-              <Form.Control
-                as="textarea"
-                rows="3"
-                name="description"
-                value={this.state.description}
-                onChange={this.handleChange}
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Budget: </Form.Label>
-              <Form.Control
-                type="number"
-                name="budget"
-                value={this.state.budget}
-                onChange={this.handleChange}
-              />
-            </Form.Group>
-            <Button variant="primary" type="submit">Submit</Button>
-        </Form>
-      </div>
-    )
-  }
-}
+  return (
+    <div className="mt-4">
+      <h3>Add a job</h3>
+        <Form onSubmit={handleSubmit}>
+          <Form.Group>
+            <Form.Label>Title: </Form.Label>
+            <Form.Control
+              type="text"
+              name="title"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+            />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Description: </Form.Label>
+            <Form.Control
+              as="textarea"
+              rows="3"
+              name="description"
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+            />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Budget: </Form.Label>
+            <Form.Control
+              type="number"
+              name="budget"
+              value={budget}
+              onChange={e => setBudget(e.target.value)}
+            />
+          </Form.Group>
+          <Button variant="primary" type="submit">Submit</Button>
+      </Form>
+    </div>
+  )
+};
+
+
+
+JobAddForm.propTypes = {
+  addJob: PropTypes.func.isRequired
+};
 
 
 export default connect(null, { addJob })(JobAddForm);

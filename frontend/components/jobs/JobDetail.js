@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Card from 'react-bootstrap/Card';
@@ -8,71 +8,69 @@ import { loadJobDetail, acceptJob, declineJob, doneJob } from '../../actions/job
 import { truncateDate } from '../../utils';
 
 
-class JobDetail extends React.Component {
+const JobDetail = props => {
+  useEffect(() => props.loadJobDetail(props.match.params.id), [props.match.params.id]);
 
-  componentDidMount() {
-    this.props.loadJobDetail(this.props.match.params.id)
+  const { isAuthenticated, user } = props.auth;
+  const { isLoading, job } = props.jobDetail;
+
+  let color;
+  if (job.status === 'available') {
+    color = 'success';
+  } else if (job.status === 'taken') {
+    color = 'warning';
+  } else if (job.status === 'done') {
+    color = 'danger';
   }
 
-  componentDidUpdate(prevProps) {
-    const { id } = this.props.match.params;
-    if (id !== prevProps.match.params.id) {
-      this.props.loadJobDetail(id)
+  let buttons;
+  if (isAuthenticated && Object.keys(job).length) {
+    if (!job.freelancer) {
+      buttons = <Button variant="primary" onClick={() => props.acceptJob(job.id)}>Accept</Button>
+    } else if (user.username === job.freelancer) {
+      buttons = (
+        <>
+          <Button variant="danger" className="mr-1" onClick={() => props.declineJob(job.id)}>Decline</Button>
+          <Button variant="success" onClick={() => props.doneJob(job.id)}>Done</Button>
+        </>
+      )
     }
   }
 
-  render() {
-    const { isAuthenticated, user } = this.props.auth;
-    const { isLoading, job } = this.props.jobDetail;
-
-    let color;
-    if (job.status === 'available') {
-      color = 'success';
-    } else if (job.status === 'taken') {
-      color = 'warning';
-    } else if (job.status === 'done') {
-      color = 'danger';
-    }
-
-    let buttons;
-    if (isAuthenticated && Object.keys(job).length) {
-      if (!job.freelancer) {
-        buttons = <Button variant="primary" onClick={() => this.props.acceptJob(job.id)}>Accept</Button>
-      } else if (user.username === job.freelancer) {
-        buttons = (
-          <>
-            <Button variant="danger" className="mr-1" onClick={() => this.props.declineJob(job.id)}>Decline</Button>
-            <Button variant="success" onClick={() => this.props.doneJob(job.id)}>Done</Button>
-          </>
-        )
+  return (
+    <Card className="mt-3">
+      <Card.Header className="position-relative text-uppercase text-center font-weight-bold">
+        Job details
+        <span
+          className={`position-absolute text-capitalize font-weight-normal text-${color}`}
+          style={{ top: '0.3rem', right: '0.8rem' }}
+        >
+          {job.status} {job.freelancer && user.id === job.user ? `(by ${job.freelancer})` : ''}
+        </span>
+      </Card.Header>
+      {
+        !isLoading &&
+          <Card.Body>
+            <Card.Title>{job.title}</Card.Title>
+            <Card.Text>{job.description}</Card.Text>
+            <p>Budget: ${job.budget}</p>
+            <p>Created: {truncateDate(job.timestamp)}</p>
+            {buttons}
+          </Card.Body>
       }
-    }
+    </Card>
+  )
+};
 
-    return (
-      <Card className="mt-3">
-        <Card.Header className="position-relative text-uppercase text-center font-weight-bold">
-          Job details
-          <span
-            className={`position-absolute text-capitalize font-weight-normal text-${color}`}
-            style={{ top: '0.3rem', right: '0.8rem' }}
-          >
-            {job.status} {job.freelancer && user.id === job.user ? `(by ${job.freelancer})` : ''}
-          </span>
-        </Card.Header>
-        {
-          !isLoading &&
-            <Card.Body>
-              <Card.Title>{job.title}</Card.Title>
-              <Card.Text>{job.description}</Card.Text>
-              <p>Budget: ${job.budget}</p>
-              <p>Created: {truncateDate(job.timestamp)}</p>
-              {buttons}
-            </Card.Body>
-        }
-      </Card>
-    )
-  }
-}
+
+JobDetail.propTypes = {
+  loadJobDetail: PropTypes.func.isRequired,
+  acceptJob: PropTypes.func.isRequired,
+  declineJob: PropTypes.func.isRequired,
+  doneJob: PropTypes.func.isRequired,
+  auth: PropTypes.object.isRequired,
+  jobDetail: PropTypes.object.isRequired
+};
 
 
 const mapStateToProps = state => ({ auth: state.auth, jobDetail: state.jobDetail });
